@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Лабораторная работа 5</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    </head>
+
+    <body>
+        <table id="first_image" border="1" cellpadding="15">
+        <table id="first_image_code" border="1">
+        </table1>
+    </body>
+
+    <style>
+        canvas {
+            border: 1px dashed black;
+        }
+    </style>
+
+    <script>      
+        var J = 8;
+        var I = 5;
+        
+        var first_image = [];
+        for (var i = 0; i < J*I; ++i) {
+            first_image[i] = 0;
+        }
+
+        var table1 = document.getElementById('first_image');
+        for (var j = 0; j < J; ++j) {
+            var row = document.createElement("tr");
+            for (var i = 0; i < I; ++i) {
+                var cell = document.createElement("td");
+                cell.id = "t1c" + j.toString() + i.toString();
+                cell.addEventListener("click", function(){ 
+                    var id = this.id;
+                    var t1_code_cell_id = id.substr(0,2) + "\'" + id.substr(2);
+                    // console.log(t1_code_cell_id);
+                    t1_code_cell = document.getElementById(t1_code_cell_id);
+                    if (this.bgColor == "black") {this.bgColor = "white"; first_image[this.rowSpan * this.colSpan] = 0; t1_code_cell.innerHTML = "0"; }
+                    else {this.bgColor = "black"; first_image[this.rowSpan * this.colSpan] = 1;  t1_code_cell.innerHTML = "1"; }
+                });
+                row.appendChild(cell);
+            }
+            table1.appendChild(row);
+        }
+
+        var table1_code = document.getElementById('first_image_code');
+        for (var j = 0; j < J; ++j) {
+            var row = document.createElement("tr");
+            for (var i = 0; i < I; ++i) {
+                var cell = document.createElement("td");
+                var cell_text = document.createTextNode(first_image[i*j]);
+                cell.appendChild(cell_text);
+                cell.width = 30-2;
+                cell.height = 30-2;
+                cell.id = "t1'c" + j.toString() + i.toString();
+                row.appendChild(cell);
+            }
+            table1_code.appendChild(row);
+        }
+
+    </script>
+</html>
