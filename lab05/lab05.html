@@ -31,7 +31,6 @@
         first_botton_input = document.getElementById("first_text_input_button");
         first_botton_input.onclick = function() {
             var text = document.getElementById("first_text_code_input").value;
-            // var input_text_field = document.getElementById("first_text_code_input");
             var result = [];
             for (var i = 0; i < text.length; ++i) {
                 if (text[i-1]+text[i] == "-1") {
@@ -46,19 +45,11 @@
                 return;
             }
             first_image = result;
-            // console.log(first_image);
             update_table("first_image_table", first_image);
         }
 
         first_botton_output = document.getElementById("first_text_output_button");
         first_botton_output.onclick = function() { 
-            // var first_image_code_in_string = "[ ";
-            // for (var i = 0; i < first_image.length; ++i){
-            //     first_image_code_in_string += first_image[i].toString() + ", ";
-            // }
-            // first_image_code_in_string = first_image_code_in_string.substr(0, first_image_code_in_string.length-2) + " ]";
-            // console.log(first_image_code_in_string);
-            // console.log(first_image);
             update_text_field("first_text_code_output", first_image);
         }
 
@@ -68,7 +59,7 @@
                 first_image[i] = -1;
             }
             table_init(first_image);
-            update_text_field("first_text_code_output" ,first_image);
+            update_text_field("first_text_code_output", first_image);
         }
 
         function table_init(first_image) {
@@ -89,11 +80,7 @@
 
                         if (this.bgColor == "black") {this.bgColor = "white"; first_image[((row_num) * I ) + cell_num] = -1; t1_code_cell.innerHTML = "-1"; }
                         else {this.bgColor = "black"; first_image[((row_num) * I ) + cell_num] = 1; t1_code_cell.innerHTML = "1"; }
-                        // var tmp = "";
-                        // for (var i = 0; i < first_image.length; ++i) {
-                        //     tmp += first_image[i].toString();
-                        // }
-                        // console.log(tmp);
+                        // console.log(first_image);
                     });
                     row.appendChild(cell);
                 }
@@ -133,8 +120,9 @@
 
         // обновляет текстовое поле вывода 
         function update_text_field(text_field_id, data) {
+            console.log(data);
             var text_field = document.getElementById(text_field_id);
-            text_field.innerHTML = data;
+            text_field.value = data;
         }
 
     </script>

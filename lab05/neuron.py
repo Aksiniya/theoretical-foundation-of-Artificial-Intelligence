@@ -55,10 +55,10 @@ class Hopfield_neuron(one_neuron):
     def y_init_by_value(self, value):
         self.y = value
 
-    def net_init(self):
+    def net_init(self, previous_y_vector):
         sum_net = 0
-        for w in self.weights:
-            sum_net += w * self.previous_y
+        for w_ind in range(len(self.weights)):
+            sum_net += self.weights[w_ind] * previous_y_vector[w_ind]
         self.net = sum_net
         return sum_net
 
