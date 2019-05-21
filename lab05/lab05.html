@@ -6,15 +6,15 @@
     </head>
 
     <body>
-        <p><textarea id="first_text_code_input" cols="26" rows="8"></textarea></p>
-        <input type="button" id="first_text_input_button" value="Загрузить код">
+        <textarea id="first_text_code_input" cols="26" rows="8"></textarea><br>
+        <input type="button" id="first_text_input_button" value="Загрузить код"><br>
         
-        <table id="first_image_table" border="1" cellpadding="15">
+        <table id="first_image_table" border="1"></table><br>
         
-        <p><table id="first_image_code_table" border="1"></p>
+        <table id="first_image_code_table" border="1"></table><br>
         
-        <p><textarea id="first_text_code_output" cols="26" rows="8"></textarea></p>
-        <input type="button" id="first_text_output_button" value="Получить код">
+        <textarea id="first_text_code_output" cols="26" rows="8"></textarea><br>
+        <input type="button" id="first_text_output_button" value="Получить код"><br>
     </body>
 
     <style>
@@ -26,155 +26,144 @@
     <script>      
         var J = 8;
         var I = 5;
-        var first_image = [];
 
-        //table type:
-        var color_table_type = "color_table";
-        var code_table_type = "code_table";
-        //
-
-        first_botton_input = document.getElementById("first_text_input_button");
-        first_botton_input.onclick = function() {
-            load_code_in_table("first_text_code_input", "first_image_table" ,"first_image_code_table", first_image);
-        }
-
-        first_botton_output = document.getElementById("first_text_output_button");
-        first_botton_output.onclick = function() { 
-            update_text_field("first_text_code_output", first_image);
-        }
-
+        var first_image;
         window.onload = function() {
-            for (var i = 0; i < J*I; ++i) {
-                first_image[i] = -1;
-            }
-            table_init("first_image_table", "first_image_code_table",first_image, "1", first_image);
-            // table_init("first_image_code_table", first_image, "1", code_table_type);
-
-            update_text_field("first_text_code_output", first_image);
+            first_image = new image(I, J, "first_text_code_input", "first_text_code_output", "first_text_input_button", "first_text_output_button", "first_image_table", "first_image_code_table");
+            first_image.table_init("1");
         }
 
-        function table_init(table_id, code_table_id, data, table_name_in_str, data) {
-            // table name field must not contain a character 'c' !
-            // code table name is this table name plus \'
-            var table = document.getElementById(table_id);
-            var code_table = document.getElementById(code_table_id);
-            for (var j = 0; j < J; ++j) {
-                var row = document.createElement("tr");
-                var code_row = document.createElement("tr");
-                for (var i = 0; i < I; ++i) {
-                    var cell = document.createElement("td");
-                    var code_cell = document.createElement("td");
-                    cell.id = "t" + table_name_in_str + "c" + j.toString() + i.toString();
-                    cell.addEventListener("click", function(){
-                        row_num_in_str = this.id.substr(this.id.match(/c/).index + 1, 1);
-                        row_num = parseInt(row_num_in_str, 10);
-                        cell_num = this.cellIndex;
 
-                        var code_table_cell_id = "t" + table_name_in_str + "\'c" + row_num.toString() + cell_num.toString();
-                        code_table_cell = document.getElementById(code_table_cell_id);
-                        if (this.bgColor == "black") {this.bgColor = "white"; data[((row_num) * I ) + cell_num] = -1; code_table_cell.innerHTML = "-1"; }
-                        else {this.bgColor = "black"; data[((row_num) * I ) + cell_num] = 1; code_table_cell.innerHTML = "1"; }
-                    });
-                    
-                    code_cell.id = "t" + table_name_in_str + "\'c" + j.toString() + i.toString();
-                    var cell_text = document.createTextNode(data[i*j]);
-                    code_cell.appendChild(cell_text);
-                    code_cell.width = 30-2;
-                    code_cell.height = 30-2;
-                    
-                    row.appendChild(cell);
-                    code_row.appendChild(code_cell);
+        class image {
+            constructor (I, J, input_textfield_id, output_textfield_id, input_button_id, output_button_id, color_table_id, code_table_id ) {
+                this.I = I;
+                this.J = J;
+                this.data = [];
+                for (var d = 0; d < I*J; ++d) {
+                    this.data.push(-1);
                 }
-                table.appendChild(row);
-                code_table.appendChild(code_row);
-            }
-        }
+                this.input_textfield_id = input_textfield_id;
+                this.output_textfield_id = output_textfield_id;
+                this.input_button_id = input_button_id;
+                this.output_button_id = output_button_id;
+                this.color_table_id = color_table_id;
+                this.code_table_id = code_table_id;
+                this.color_table_type = "color_table";
+                this.code_table_type = "code_table";
 
-        // function table_init(first_image) {
-        //     var table1 = document.getElementById('first_image_table');
-        //     for (var j = 0; j < J; ++j) {
-        //         var row = document.createElement("tr");
-        //         for (var i = 0; i < I; ++i) {
-        //             var cell = document.createElement("td");
-        //             cell.id = "t1c" + j.toString() + i.toString();
-        //             cell.addEventListener("click", function(){ 
+                var button_input = document.getElementById(this.input_button_id);
+                var t = this;
+                button_input.onclick = function() {
+                    t.load_code_in_table();
+                }
+
+                var button_output = document.getElementById(output_button_id);
+                var data_ = this.data;
+                button_output.onclick = function() { 
+                    var text_field = document.getElementById(output_textfield_id);
+                    text_field.value = data_;
+                }
+            }
+
+            input_button_init() {
+                var button_input = document.getElementById(this.input_button_id);
+                var input_textfield_id = this.input_textfield_id;
+                
+                var t = this;
+                button_input.onclick = function() {
+                    t.load_code_in_table();
+                }
+            }
+
+            table_init(table_name_in_str) {
+                // table name field must not contain a character 'c' !
+                // code table name is this table name plus \'
+                var table = document.getElementById(this.color_table_id);
+                var code_table = document.getElementById(this.code_table_id);
+                for (var j = 0; j < this.J; ++j) {
+                    var row = document.createElement("tr");
+                    var code_row = document.createElement("tr");
+                    for (var i = 0; i < this.I; ++i) {
+                        var cell = document.createElement("td");
+                        var code_cell = document.createElement("td");
+                        cell.id = "t" + table_name_in_str + "c" + j.toString() + i.toString();
+                        cell.width = 30;
+                        cell.height = 30;
                         
-        //                 row_num = parseInt(this.parentElement.firstChild.id.substr(3,1), 10);
-        //                 cell_num = this.cellIndex;
-
-        //                 var id = this.id;
-        //                 var t1_code_cell_id = id.substr(0,2) + "\'" + id.substr(2);
-        //                 t1_code_cell = document.getElementById(t1_code_cell_id);
-
-        //                 if (this.bgColor == "black") {this.bgColor = "white"; first_image[((row_num) * I ) + cell_num] = -1; t1_code_cell.innerHTML = "-1"; }
-        //                 else {this.bgColor = "black"; first_image[((row_num) * I ) + cell_num] = 1; t1_code_cell.innerHTML = "1"; }
-        //             });
-        //             row.appendChild(cell);
-        //         }
-        //         table1.appendChild(row);
-        //     }
-
-        // var table1_code = document.getElementById('first_image_code_table');
-        // for (var j = 0; j < J; ++j) {
-        //     var row = document.createElement("tr");
-        //     for (var i = 0; i < I; ++i) {
-        //         var cell = document.createElement("td");
-        //         var cell_text = document.createTextNode(first_image[i*j]);
-        //         cell.appendChild(cell_text);
-        //         cell.width = 30-2;
-        //         cell.height = 30-2;
-        //         cell.id = "t1'c" + j.toString() + i.toString();
-        //         row.appendChild(cell);
-        //     }
-        //     table1_code.appendChild(row);
-        // }
-        
-
-        function load_code_in_table(text_field_id, color_table_id, code_table_id, data) {
-            var text = document.getElementById(text_field_id).value;
-            var result = [];
-            for (var i = 0; i < text.length; ++i) {
-                if (text[i-1]+text[i] == "-1") {
-                    result.push(-1);
-                }
-                else if (text[i] == "1"){
-                    result.push(1);
-                }
-            }
-            if (result.length != J*I){
-                alert("Ошибка в поле ввода – длина не соответствует размерности матрицы.");
-                return;
-            }
-            data = result;
-            update_table(color_table_id, data, color_table_type);
-            update_table(code_table_id, data, code_table_type);
-        }
-
-        function update_table(table_id, data, table_type) {
-            var table = document.getElementById(table_id);
-            var rows = table.getElementsByTagName("tr");
-            for (var i = 0; i < rows.length; ++i) {
-                row = rows[i].children;
-                for (var j = 0; j < row.length; ++j) {
-                    if (table_type == code_table_type) {
-                        row[j].innerHTML = data[i*I+j];
+                        var I_ = this.I;
+                        var data = this.data;
+                        cell.addEventListener("click", function(){
+                            var row_num_in_str = this.id.substr(this.id.match(/c/).index + 1, 1);
+                            var row_num = parseInt(row_num_in_str, 10);
+                            var cell_num = this.cellIndex;
+                            var code_table_cell_id = "t" + table_name_in_str + "\'c" + row_num.toString() + cell_num.toString();
+                            var code_table_cell = document.getElementById(code_table_cell_id);
+                            if (this.bgColor == "black") {this.bgColor = "white"; data[((row_num) * I_ ) + cell_num] = -1; code_table_cell.innerHTML = "-1"; }
+                            else {this.bgColor = "black"; data[((row_num) * I_ ) + cell_num] = 1; code_table_cell.innerHTML = "1"; }
+                        });
+                        
+                        code_cell.id = "t" + table_name_in_str + "\'c" + j.toString() + i.toString();
+                        code_cell.width = 30;
+                        code_cell.height = 30;
+                        code_cell.innerHTML = this.data[i*j];
+                        
+                        row.appendChild(cell);
+                        code_row.appendChild(code_cell);
                     }
-                    else if (table_type == color_table_type) {
-                        if (data[i*I+j] == 1) {
-                            row[j].bgColor = "black";
+                    table.appendChild(row);
+                    code_table.appendChild(code_row);
+                }
+                this.update_table(this.code_table_type, this.code_table_id);
+            }
+
+            load_code_in_table() {
+                var text = document.getElementById(this.input_textfield_id).value;
+                var result = [];
+                for (var i = 0; i < text.length; ++i) {
+                    if (text[i-1]+text[i] == "-1") {
+                        result.push(-1);
+                    }
+                    else if (text[i] == "1"){
+                        result.push(1);
+                    }
+                }
+                if (result.length != this.J*this.I){
+                    alert("Ошибка в поле ввода – длина не соответствует размерности матрицы.");
+                    return;
+                }
+                this.data = result;
+                this.update_table(this.color_table_type, this.color_table_id);
+                this.update_table(this.code_table_type, this.code_table_id);
+            }
+
+
+            update_table(table_type, table_id) {
+                var table = document.getElementById(table_id);
+                var rows = table.getElementsByTagName("tr");
+                for (var i = 0; i < rows.length; ++i) {
+                    var row = rows[i].children;
+                    for (var j = 0; j < row.length; ++j) {
+                        if (table_type == "code_table") {
+                            // console.log(this.data[i*this.I+j]);
+                            row[j].innerHTML = this.data[i*this.I+j];
                         }
-                        else {
-                            row[j].bgColor = "white";
+                        else if (table_type == "color_table") {
+                            if (this.data[i*this.I+j] == 1) {
+                                row[j].bgColor = "black";
+                            }
+                            else {
+                                row[j].bgColor = "white";
+                            }
                         }
                     }
                 }
             }
-        }
 
-        // обновляет текстовое поле вывода 
-        function update_text_field(text_field_id, data) {
-            var text_field = document.getElementById(text_field_id);
-            text_field.value = data;
+            update_text_field(text_field_id, data) {
+                var text_field = document.getElementById(text_field_id);
+                text_field.value = data;
+            }
+
         }
 
     </script>
