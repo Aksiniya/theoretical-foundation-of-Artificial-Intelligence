@@ -33,6 +33,103 @@
         var code_table_type = "code_table";
         //
 
+        first_botton_input = document.getElementById("first_text_input_button");
+        first_botton_input.onclick = function() {
+            load_code_in_table("first_text_code_input", "first_image_table" ,"first_image_code_table", first_image);
+        }
+
+        first_botton_output = document.getElementById("first_text_output_button");
+        first_botton_output.onclick = function() { 
+            update_text_field("first_text_code_output", first_image);
+        }
+
+        window.onload = function() {
+            for (var i = 0; i < J*I; ++i) {
+                first_image[i] = -1;
+            }
+            table_init("first_image_table", "first_image_code_table",first_image, "1", first_image);
+            // table_init("first_image_code_table", first_image, "1", code_table_type);
+
+            update_text_field("first_text_code_output", first_image);
+        }
+
+        function table_init(table_id, code_table_id, data, table_name_in_str, data) {
+            // table name field must not contain a character 'c' !
+            // code table name is this table name plus \'
+            var table = document.getElementById(table_id);
+            var code_table = document.getElementById(code_table_id);
+            for (var j = 0; j < J; ++j) {
+                var row = document.createElement("tr");
+                var code_row = document.createElement("tr");
+                for (var i = 0; i < I; ++i) {
+                    var cell = document.createElement("td");
+                    var code_cell = document.createElement("td");
+                    cell.id = "t" + table_name_in_str + "c" + j.toString() + i.toString();
+                    cell.addEventListener("click", function(){
+                        row_num_in_str = this.id.substr(this.id.match(/c/).index + 1, 1);
+                        row_num = parseInt(row_num_in_str, 10);
+                        cell_num = this.cellIndex;
+
+                        var code_table_cell_id = "t" + table_name_in_str + "\'c" + row_num.toString() + cell_num.toString();
+                        code_table_cell = document.getElementById(code_table_cell_id);
+                        if (this.bgColor == "black") {this.bgColor = "white"; data[((row_num) * I ) + cell_num] = -1; code_table_cell.innerHTML = "-1"; }
+                        else {this.bgColor = "black"; data[((row_num) * I ) + cell_num] = 1; code_table_cell.innerHTML = "1"; }
+                    });
+                    
+                    code_cell.id = "t" + table_name_in_str + "\'c" + j.toString() + i.toString();
+                    var cell_text = document.createTextNode(data[i*j]);
+                    code_cell.appendChild(cell_text);
+                    code_cell.width = 30-2;
+                    code_cell.height = 30-2;
+                    
+                    row.appendChild(cell);
+                    code_row.appendChild(code_cell);
+                }
+                table.appendChild(row);
+                code_table.appendChild(code_row);
+            }
+        }
+
+        // function table_init(first_image) {
+        //     var table1 = document.getElementById('first_image_table');
+        //     for (var j = 0; j < J; ++j) {
+        //         var row = document.createElement("tr");
+        //         for (var i = 0; i < I; ++i) {
+        //             var cell = document.createElement("td");
+        //             cell.id = "t1c" + j.toString() + i.toString();
+        //             cell.addEventListener("click", function(){ 
+                        
+        //                 row_num = parseInt(this.parentElement.firstChild.id.substr(3,1), 10);
+        //                 cell_num = this.cellIndex;
+
+        //                 var id = this.id;
+        //                 var t1_code_cell_id = id.substr(0,2) + "\'" + id.substr(2);
+        //                 t1_code_cell = document.getElementById(t1_code_cell_id);
+
+        //                 if (this.bgColor == "black") {this.bgColor = "white"; first_image[((row_num) * I ) + cell_num] = -1; t1_code_cell.innerHTML = "-1"; }
+        //                 else {this.bgColor = "black"; first_image[((row_num) * I ) + cell_num] = 1; t1_code_cell.innerHTML = "1"; }
+        //             });
+        //             row.appendChild(cell);
+        //         }
+        //         table1.appendChild(row);
+        //     }
+
+        // var table1_code = document.getElementById('first_image_code_table');
+        // for (var j = 0; j < J; ++j) {
+        //     var row = document.createElement("tr");
+        //     for (var i = 0; i < I; ++i) {
+        //         var cell = document.createElement("td");
+        //         var cell_text = document.createTextNode(first_image[i*j]);
+        //         cell.appendChild(cell_text);
+        //         cell.width = 30-2;
+        //         cell.height = 30-2;
+        //         cell.id = "t1'c" + j.toString() + i.toString();
+        //         row.appendChild(cell);
+        //     }
+        //     table1_code.appendChild(row);
+        // }
+        
+
         function load_code_in_table(text_field_id, color_table_id, code_table_id, data) {
             var text = document.getElementById(text_field_id).value;
             var result = [];
@@ -51,64 +148,6 @@
             data = result;
             update_table(color_table_id, data, color_table_type);
             update_table(code_table_id, data, code_table_type);
-        }
-
-        first_botton_input = document.getElementById("first_text_input_button");
-        first_botton_input.onclick = function() {
-            load_code_in_table("first_text_code_input", "first_image_table" ,"first_image_code_table", first_image);
-        }
-
-        first_botton_output = document.getElementById("first_text_output_button");
-        first_botton_output.onclick = function() { 
-            update_text_field("first_text_code_output", first_image);
-        }
-
-        window.onload = function() {
-            for (var i = 0; i < J*I; ++i) {
-                first_image[i] = -1;
-            }
-            table_init(first_image);
-            update_text_field("first_text_code_output", first_image);
-        }
-
-        function table_init(first_image) {
-            var table1 = document.getElementById('first_image_table');
-            for (var j = 0; j < J; ++j) {
-                var row = document.createElement("tr");
-                for (var i = 0; i < I; ++i) {
-                    var cell = document.createElement("td");
-                    cell.id = "t1c" + j.toString() + i.toString();
-                    cell.addEventListener("click", function(){ 
-                        
-                        row_num = parseInt(this.parentElement.firstChild.id.substr(3,1), 10);
-                        cell_num = this.cellIndex;
-
-                        var id = this.id;
-                        var t1_code_cell_id = id.substr(0,2) + "\'" + id.substr(2);
-                        t1_code_cell = document.getElementById(t1_code_cell_id);
-
-                        if (this.bgColor == "black") {this.bgColor = "white"; first_image[((row_num) * I ) + cell_num] = -1; t1_code_cell.innerHTML = "-1"; }
-                        else {this.bgColor = "black"; first_image[((row_num) * I ) + cell_num] = 1; t1_code_cell.innerHTML = "1"; }
-                    });
-                    row.appendChild(cell);
-                }
-                table1.appendChild(row);
-            }
-
-            var table1_code = document.getElementById('first_image_code_table');
-            for (var j = 0; j < J; ++j) {
-                var row = document.createElement("tr");
-                for (var i = 0; i < I; ++i) {
-                    var cell = document.createElement("td");
-                    var cell_text = document.createTextNode(first_image[i*j]);
-                    cell.appendChild(cell_text);
-                    cell.width = 30-2;
-                    cell.height = 30-2;
-                    cell.id = "t1'c" + j.toString() + i.toString();
-                    row.appendChild(cell);
-                }
-                table1_code.appendChild(row);
-            }
         }
 
         function update_table(table_id, data, table_type) {
