@@ -26,11 +26,15 @@
     <script>      
         var J = 8;
         var I = 5;
-        var first_image = [0];
+        var first_image = [];
 
-        first_botton_input = document.getElementById("first_text_input_button");
-        first_botton_input.onclick = function() {
-            var text = document.getElementById("first_text_code_input").value;
+        //table type:
+        var color_table_type = "color_table";
+        var code_table_type = "code_table";
+        //
+
+        function load_code_in_table(text_field_id, color_table_id, code_table_id, data) {
+            var text = document.getElementById(text_field_id).value;
             var result = [];
             for (var i = 0; i < text.length; ++i) {
                 if (text[i-1]+text[i] == "-1") {
@@ -44,15 +48,20 @@
                 alert("Ошибка в поле ввода – длина не соответствует размерности матрицы.");
                 return;
             }
-            first_image = result;
-            update_table("first_image_table", first_image);
+            data = result;
+            update_table(color_table_id, data, color_table_type);
+            update_table(code_table_id, data, code_table_type);
+        }
+
+        first_botton_input = document.getElementById("first_text_input_button");
+        first_botton_input.onclick = function() {
+            load_code_in_table("first_text_code_input", "first_image_table" ,"first_image_code_table", first_image);
         }
 
         first_botton_output = document.getElementById("first_text_output_button");
         first_botton_output.onclick = function() { 
             update_text_field("first_text_code_output", first_image);
         }
-
 
         window.onload = function() {
             for (var i = 0; i < J*I; ++i) {
@@ -80,7 +89,6 @@
 
                         if (this.bgColor == "black") {this.bgColor = "white"; first_image[((row_num) * I ) + cell_num] = -1; t1_code_cell.innerHTML = "-1"; }
                         else {this.bgColor = "black"; first_image[((row_num) * I ) + cell_num] = 1; t1_code_cell.innerHTML = "1"; }
-                        // console.log(first_image);
                     });
                     row.appendChild(cell);
                 }
@@ -103,16 +111,22 @@
             }
         }
 
-        function update_table(table_id, data){
-            var table = document.getElementById(table_id).childNodes;
-            for (var i = 1; i < table.length; ++i) {
-                row = table[i];
-                for(var j = 0; j < row.childNodes.length; ++j) {
-                    if (data[((i-1)*I)+j] == 1) {
-                        row.childNodes[j].bgColor = "black";
+        function update_table(table_id, data, table_type) {
+            var table = document.getElementById(table_id);
+            var rows = table.getElementsByTagName("tr");
+            for (var i = 0; i < rows.length; ++i) {
+                row = rows[i].children;
+                for (var j = 0; j < row.length; ++j) {
+                    if (table_type == code_table_type) {
+                        row[j].innerHTML = data[i*I+j];
                     }
-                    else {
-                        row.childNodes[j].bgColor = "white";
+                    else if (table_type == color_table_type) {
+                        if (data[i*I+j] == 1) {
+                            row[j].bgColor = "black";
+                        }
+                        else {
+                            row[j].bgColor = "white";
+                        }
                     }
                 }
             }
@@ -120,7 +134,6 @@
 
         // обновляет текстовое поле вывода 
         function update_text_field(text_field_id, data) {
-            console.log(data);
             var text_field = document.getElementById(text_field_id);
             text_field.value = data;
         }
