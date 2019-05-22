@@ -1,80 +1,29 @@
 import neuron
+import json
+# input_images = [ [ -1 , -1 , 1 , -1 , -1 , -1 , 1 , 1 , -1 , -1 , 1 , -1 , 1 , -1 , -1 , -1 , -1 , 1 , -1 , -1 , -1 , -1 , 1 , -1 , -1 , -1 , -1 , 1 , -1 , -1 , -1 , -1 , 1 , -1 , -1 , 1 , 1 , 1 , 1 , 1 ] , [ -1 , 1 , 1 , 1 , -1 , 1 , -1 , -1 , -1 , 1 , 1 , -1 , -1 , -1 , 1 , -1 , -1 , -1 , 1 , -1 , -1 , -1 , 1 , -1 , -1 , -1 , 1 , -1 , -1 , -1 , 1 , -1 , -1 , -1 , 1 , 1 , 1 , 1 , 1 , 1 ] , [ -1 , -1 , 1 , -1 , -1 , -1 , 1 , 1 , 1 , -1 , 1 , -1 , 1 , -1 , 1 , -1 , 1 , 1 , 1 , -1 , 1 , -1 , 1 , -1 , 1 , -1 , 1 , 1 , 1 , -1 , 1 , -1 , 1 , -1 , 1 , -1 , -1 , 1 , -1 , -1 ] ]
+# recognizable_image = [-1,1,1,1,-1,-1,-1,-1,-1,1,-1,-1,-1,-1,1,-1,-1,-1,1,-1,-1,-1,1,-1,-1,-1,1,-1,-1,-1,1,-1,-1,-1,-1,1,1,1,1,-1]
 
-image_1 = [
-    0,0,1,0,0,
-    0,0,1,0,0,
-    0,1,0,1,0,
-    0,1,0,1,0,
-    0,1,1,1,0,
-    1,1,0,1,1,
-    1,0,0,0,1,
-    1,0,0,0,1
-]
 
-image_2 = [
-    0,1,1,1,0,
-    0,0,1,0,0,
-    0,0,1,0,0,
-    0,0,1,0,0,
-    0,0,1,0,0,
-    0,0,1,0,0,
-    0,0,1,0,0,
-    0,1,1,1,0
-]
-
-image_3 = [
-    1,1,1,1,1,
-    1,1,0,0,0,
-    1,1,0,0,0,
-    1,1,1,1,1,
-    1,1,1,1,1,
-    1,1,0,0,0,
-    1,1,0,0,0,
-    1,1,0,0,0
-]
-
-image_4 = [-1,-1,1,-1,-1,-1,1,1,1,-1,1,1,1,1,1,-1,-1,1,-1,-1,-1,1,1,1,-1,1,1,1,1,1,-1,-1,1,-1,-1,-1,-1,1,-1,-1]
-
-test_image = [
-    1,1,1,1,1,
-    1,0,0,0,0,
-    0,0,0,0,0,
-    1,0,0,1,0,
-    1,1,1,0,1,
-    0,0,0,0,0,
-    1,0,0,0,0,
-    1,0,0,0,0
-]
 
 def main():
-    # I = 5
-    # J = 8
-    # neuron_num = I*J # = K
-    L = [image_1, image_2, image_3, image_4]
-   
-# КОСТЫЛЬ ОН
-    for image in L:
-        index = 0
-        for _ in image:
-            if _ == 0: image[index] = -1
-            index += 1
-    
-    index_ = 0
-    for _ in test_image:
-        if _ == 0: test_image[index_]  = -1
-        index_ += 1
 
-# КОСТЫЛЬ ОФФ
+    print("Введите вектор образов, а затем искаженный образ:")
+    # input_images_from_console = ()
+    input_images = json.loads(input())
+    # print(input_images)
+    # print("Введите искаженный образ:")
+    recognizable_image = json.loads(input())
+    # print(recognizable_image)
 
     weights = []
-    neuron_layer = learning_process(weights, L)
-    recognize_image( test_image, neuron_layer, 10, L)
+    neuron_layer = learning_process(weights, input_images)
+    recognize_image( recognizable_image, neuron_layer, 10, input_images)
 
 
-def recognize_image(image, neuron_layer, era_num, L):
+def recognize_image(image, neuron_layer, era_num, input_images):
     first_y_init(neuron_layer, image)
     previous_y = image.copy()
-    for ep_num in range(era_num):
+    for ep_num in range(1, era_num):
         output = []
         for neuron_i in neuron_layer:
             neuron_i.previous_y_init()
@@ -82,34 +31,35 @@ def recognize_image(image, neuron_layer, era_num, L):
             output.append(neuron_i.y_init())
         previous_y = output
 
-        for l in L:
+        for l in input_images:
             if output == l:
-                print("Я УЗНАЛ! УЗНАЛ ЗА", ep_num,"ЭПОХ!")
+                print("Распознано. Эпохи: ", ep_num )
                 for str in range(5, len(l), 5):
                     print(l[str-5:str])
                 print("Output:", output)
                 return
     
-    print("Не, ну это дичь какая-то, я не знаю что это")
+    print("Я не знаю что это.")
+    print("Химера: ", output)
 
     
 
-def learning_process(weights, L):
-    weights_init(weights, L)
+def learning_process(weights, input_images):
+    weights_init(weights, input_images)
     neuron_layer = []
     # инициализация весов
-    for _ in range(len(L[0])):
+    for _ in range(len(input_images[0])):
          neuron_layer.append( neuron.Hopfield_neuron(weights=weights[_]) )
     return neuron_layer
 
 
-def weights_init(weights, L):
-    for k_m in range(len(L[0])):
+def weights_init(weights, input_images):
+    for k_m in range(len(input_images[0])):
         weights_k = [] # вектор-вес K-го нейрона
-        for k_n in range(len(L[0])): # инициализация вектора
+        for k_n in range(len(input_images[0])): # инициализация вектора
             w_mn = 0
             if k_m != k_n:
-                for l in L:
+                for l in input_images:
                     w_mn += l[k_n] * l[k_m]
             weights_k.append(w_mn)
         weights.append(weights_k)
