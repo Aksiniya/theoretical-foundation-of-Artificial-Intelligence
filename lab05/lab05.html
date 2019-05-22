@@ -7,21 +7,21 @@
 </head>
 
 <body>
-    <div class="image_holder">
-        <div class="settings">
-
-        </div>
+    <div class="settings">
+            <b>Ширина: </b><input type="number" id="pixel_width" min="2" max="20" value="5">
+            <b>Высота: </b><input type="number" id="pixel_height" min="2" max="20" value="8">
+            <b>Количество образов: </b><input type="number" id="image_number" min="1" value="3">
+            <input type="button" id="apply_settings" value="Go!"><br>
+    </div>
+    <div class="image_holder" id="images_array_div">
         <div class="image">
-                <textarea id="load_image_textfield_1" cols="26" rows="5"
-                    placeholder="Вектор типа [p1, p2, ..., p(I*J-1)] ,где p – пиксель (p = 1 – чёрный пиксель, p = -1 – белый пиксель)"></textarea><br>
-                <input type="button" id="load_code_in_table_button_1" value="Загрузить код в таблицу"><br>
-                <table id="image_color_table_1" border="1"></table><br>
-                <table id="image_code_table_1" border="1"></table><br>
-                <textarea id="get_image_code_textfield_1" cols="26" rows="5" disabled></textarea><br>
-                <input type="button" id="get_image_code_button_1" value="Получить код"><br>
-        </div>
-        <div class="image" id="images_array_div">
-            
+            <textarea id="load_image_textfield_1" cols="26" rows="5"
+                placeholder="Вектор типа [p1, p2, ..., p(I*J-1)] ,где p – пиксель (p = 1 – чёрный пиксель, p = -1 – белый пиксель)"></textarea><br>
+            <input type="button" id="load_code_in_table_button_1" value="Загрузить код в таблицу"><br>
+            <table id="image_color_table_1" border="1"></table><br>
+            <table id="image_code_table_1" border="1"></table><br>
+            <textarea id="get_image_code_textfield_1" cols="26" rows="5" disabled></textarea><br>
+            <input type="button" id="get_image_code_button_1" value="Получить код"><br>
         </div>
     </div>
 
@@ -41,6 +41,7 @@
 <script>
     var J = 8;
     var I = 5;
+    var image_number = 3;
 
     var image_array = []
     var images_array_div = document.getElementById("images_array_div");
@@ -48,9 +49,28 @@
     window.onload = function () {
         var first_image = new image(I, J, "1", "load_image_textfield_1", "get_image_code_textfield_1", "load_code_in_table_button_1", "get_image_code_button_1", "image_color_table_1", "image_code_table_1");
         image_array.push(first_image);
-        create_image("2", "images_array_div", image_array);
+        // create_image("2", "images_array_div", image_array);
         for (var im = 0; im < image_array.length; ++im ) {
             image_array[im].table_init();
+        }
+
+        var apply_settings_button = document.getElementById("apply_settings");
+        apply_settings_button.onclick = function() {
+            var I_field = document.getElementById("pixel_width");
+            var J_field = document.getElementById("pixel_height");
+            var image_num_field = document.getElementById("image_number");
+            I = I_field.value;
+            J = J_field.value;
+            image_number = image_num_field.value;
+
+            images_array_div.innerHTML = "";
+            image_array = [];
+            image_array = [];
+            for (var table_name = 0; table_name < image_number; ++table_name) {
+                create_image(table_name.toString(), "images_array_div",  image_array);
+            }
+
+            console.log(image_array);
         }
     }
 
@@ -104,6 +124,7 @@
         holder.appendChild(div_image);
 
         var image_ = new image(I, J, table_name, "load_image_textfield_" + table_name, "get_image_code_textfield_" + table_name, "load_code_in_table_button_" + table_name, "get_image_code_button_" + table_name, "image_color_table_" + table_name, "image_code_table_" + table_name);
+        image_.table_init();
         image_array_.push(image_);
     }
 
@@ -126,17 +147,12 @@
             this.code_table_type = "code_table";
 
             var button_input = document.getElementById(this.input_button_id);
-            // console.log(button_input);
-            var t = this;
-            button_input.onclick = function () {
-                t.load_code_in_table();
-            }
+
+            button_input.onclick = () => this.load_code_in_table();
 
             var button_output = document.getElementById(output_button_id);
-            var data_ = this.data;
-            button_output.onclick = function () {
-                var text_field = document.getElementById(output_textfield_id);
-                text_field.value = data_;
+            button_output.onclick = () => {
+                document.getElementById(output_textfield_id).value = this.data;
             }
         }
 
@@ -155,16 +171,17 @@
                     cell.width = 30;
                     cell.height = 30;
 
-                    var I_ = this.I;
-                    var data = this.data;
-                    cell.addEventListener("click", function () {
-                        var row_num_in_str = this.id.substr(this.id.match(/c/).index + 1, 1);
+                    cell.addEventListener("click", (event) => {
+                        // debugger;
+                        var cell = event.currentTarget;
+                        var row_num_in_str = cell.id.substr(cell.id.match(/c/).index + 1, 1);
                         var row_num = parseInt(row_num_in_str, 10);
-                        var cell_num = this.cellIndex;
+                        var cell_num = cell.cellIndex;
                         var code_table_cell_id = "t" + this.table_name + "\'c" + row_num.toString() + cell_num.toString();
                         var code_table_cell = document.getElementById(code_table_cell_id);
-                        if (this.bgColor == "black") { this.bgColor = "white"; data[((row_num) * I_) + cell_num] = -1; code_table_cell.innerHTML = "-1"; }
-                        else { this.bgColor = "black"; data[((row_num) * I_) + cell_num] = 1; code_table_cell.innerHTML = "1"; }
+                        console.log(this.table_name);
+                        if (cell.bgColor == "black") { cell.bgColor = "white"; this.data[((row_num) * this.I) + cell_num] = -1; code_table_cell.innerHTML = "-1"; }
+                        else { cell.bgColor = "black"; this.data[((row_num) * this.I) + cell_num] = 1; code_table_cell.innerHTML = "1"; }
                     });
 
                     code_cell.id = "t" + this.table_name + "\'c" + j.toString() + i.toString();
