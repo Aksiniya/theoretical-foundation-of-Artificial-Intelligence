@@ -1,170 +1,236 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Лабораторная работа 5</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    </head>
 
-    <body>
-        <textarea id="first_text_code_input" cols="26" rows="8"></textarea><br>
-        <input type="button" id="first_text_input_button" value="Загрузить код"><br>
-        
-        <table id="first_image_table" border="1"></table><br>
-        
-        <table id="first_image_code_table" border="1"></table><br>
-        
-        <textarea id="first_text_code_output" cols="26" rows="8"></textarea><br>
-        <input type="button" id="first_text_output_button" value="Получить код"><br>
-    </body>
+<head>
+    <title>Лабораторная работа 5</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
 
-    <style>
-        canvas {
-            border: 1px dashed black;
+<body>
+    <div class="image_holder">
+        <div class="settings">
+
+        </div>
+        <div class="image">
+                <textarea id="load_image_textfield_1" cols="26" rows="5"
+                    placeholder="Вектор типа [p1, p2, ..., p(I*J-1)] ,где p – пиксель (p = 1 – чёрный пиксель, p = -1 – белый пиксель)"></textarea><br>
+                <input type="button" id="load_code_in_table_button_1" value="Загрузить код в таблицу"><br>
+                <table id="image_color_table_1" border="1"></table><br>
+                <table id="image_code_table_1" border="1"></table><br>
+                <textarea id="get_image_code_textfield_1" cols="26" rows="5" disabled></textarea><br>
+                <input type="button" id="get_image_code_button_1" value="Получить код"><br>
+        </div>
+        <div class="image" id="images_array_div">
+            
+        </div>
+    </div>
+
+</body>
+
+<style>
+    textarea {
+        resize: vertical;
+        max-height: 100px;
+    }   
+    .image {
+        float: left;
+        margin: 10px;
+    } 
+</style>
+
+<script>
+    var J = 8;
+    var I = 5;
+
+    var image_array = []
+    var images_array_div = document.getElementById("images_array_div");
+
+    window.onload = function () {
+        var first_image = new image(I, J, "1", "load_image_textfield_1", "get_image_code_textfield_1", "load_code_in_table_button_1", "get_image_code_button_1", "image_color_table_1", "image_code_table_1");
+        image_array.push(first_image);
+        create_image("2", "images_array_div", image_array);
+        for (var im = 0; im < image_array.length; ++im ) {
+            image_array[im].table_init();
         }
-    </style>
+    }
 
-    <script>      
-        var J = 8;
-        var I = 5;
+    function create_image(table_name, div_holder_id, image_array_) {
+        var div_image = document.createElement("div");
+        div_image.className = "image";
 
-        var first_image;
-        window.onload = function() {
-            first_image = new image(I, J, "first_text_code_input", "first_text_code_output", "first_text_input_button", "first_text_output_button", "first_image_table", "first_image_code_table");
-            first_image.table_init("1");
+        var input_textfield = document.createElement("textarea");
+        input_textfield.id = "load_image_textfield_" + table_name;
+        input_textfield.cols = "26";
+        input_textfield.rows = "5";
+        input_textfield.placeholder = "Вектор типа [p1, p2, ..., p(I*J-1)] ,где p – пиксель (p = 1 – чёрный пиксель, p = -1 – белый пиксель)";
+        div_image.appendChild(input_textfield);
+        div_image.append(document.createElement("br"));
+
+        var load_button = document.createElement("input");
+        load_button.type = "button";
+        load_button.id = "load_code_in_table_button_" + table_name;
+        load_button.value = "Загрузить код в таблицу";
+        div_image.appendChild(load_button);
+        div_image.appendChild(document.createElement("br"));
+
+        var color_table = document.createElement("table");
+        color_table.id = "image_color_table_" + table_name;
+        color_table.border = "1";
+        div_image.appendChild(color_table);
+        div_image.appendChild(document.createElement("br"));
+
+
+        var code_table = document.createElement("table");
+        code_table.id = "image_code_table_" + table_name;
+        code_table.border = "1";
+        div_image.appendChild(code_table);
+        div_image.appendChild(document.createElement("br"));
+
+        var output_textfield = document.createElement("textarea");
+        output_textfield.id = "get_image_code_textfield_" + table_name;
+        output_textfield.cols = "26";
+        output_textfield.rows = "5";
+        div_image.appendChild(output_textfield);
+        div_image.append(document.createElement("br"));
+
+        var get_code_button = document.createElement("input");
+        get_code_button.type = "button";
+        get_code_button.id = "get_image_code_button_" + table_name;
+        get_code_button.value = "Получить код";
+        div_image.appendChild(get_code_button);
+        div_image.appendChild(document.createElement("br"));
+
+        var holder = document.getElementById(div_holder_id);
+        holder.appendChild(div_image);
+
+        var image_ = new image(I, J, table_name, "load_image_textfield_" + table_name, "get_image_code_textfield_" + table_name, "load_code_in_table_button_" + table_name, "get_image_code_button_" + table_name, "image_color_table_" + table_name, "image_code_table_" + table_name);
+        image_array_.push(image_);
+    }
+
+    class image {
+        constructor(I, J, table_name, input_textfield_id, output_textfield_id, input_button_id, output_button_id, color_table_id, code_table_id) {
+            this.I = I;
+            this.J = J;
+            this.table_name = table_name;
+            this.data = [];
+            for (var d = 0; d < I * J; ++d) {
+                this.data.push(-1);
+            }
+            this.input_textfield_id = input_textfield_id;
+            this.output_textfield_id = output_textfield_id;
+            this.input_button_id = input_button_id;
+            this.output_button_id = output_button_id;
+            this.color_table_id = color_table_id;
+            this.code_table_id = code_table_id;
+            this.color_table_type = "color_table";
+            this.code_table_type = "code_table";
+
+            var button_input = document.getElementById(this.input_button_id);
+            // console.log(button_input);
+            var t = this;
+            button_input.onclick = function () {
+                t.load_code_in_table();
+            }
+
+            var button_output = document.getElementById(output_button_id);
+            var data_ = this.data;
+            button_output.onclick = function () {
+                var text_field = document.getElementById(output_textfield_id);
+                text_field.value = data_;
+            }
+        }
+
+        table_init() {
+            // table name field must not contain a character 'c' !
+            // code table name is this table name plus \'
+            var table = document.getElementById(this.color_table_id);
+            var code_table = document.getElementById(this.code_table_id);
+            for (var j = 0; j < this.J; ++j) {
+                var row = document.createElement("tr");
+                var code_row = document.createElement("tr");
+                for (var i = 0; i < this.I; ++i) {
+                    var cell = document.createElement("td");
+                    var code_cell = document.createElement("td");
+                    cell.id = "t" + this.table_name + "c" + j.toString() + i.toString();
+                    cell.width = 30;
+                    cell.height = 30;
+
+                    var I_ = this.I;
+                    var data = this.data;
+                    cell.addEventListener("click", function () {
+                        var row_num_in_str = this.id.substr(this.id.match(/c/).index + 1, 1);
+                        var row_num = parseInt(row_num_in_str, 10);
+                        var cell_num = this.cellIndex;
+                        var code_table_cell_id = "t" + this.table_name + "\'c" + row_num.toString() + cell_num.toString();
+                        var code_table_cell = document.getElementById(code_table_cell_id);
+                        if (this.bgColor == "black") { this.bgColor = "white"; data[((row_num) * I_) + cell_num] = -1; code_table_cell.innerHTML = "-1"; }
+                        else { this.bgColor = "black"; data[((row_num) * I_) + cell_num] = 1; code_table_cell.innerHTML = "1"; }
+                    });
+
+                    code_cell.id = "t" + this.table_name + "\'c" + j.toString() + i.toString();
+                    code_cell.width = 30;
+                    code_cell.height = 30;
+                    code_cell.innerHTML = this.data[i * j];
+
+                    row.appendChild(cell);
+                    code_row.appendChild(code_cell);
+                }
+                table.appendChild(row);
+                code_table.appendChild(code_row);
+            }
+            this.update_table(this.code_table_type, this.code_table_id);
+        }
+
+        load_code_in_table() {
+            var text = document.getElementById(this.input_textfield_id).value;
+            var result = [];
+            for (var i = 0; i < text.length; ++i) {
+                if (text[i - 1] + text[i] == "-1") {
+                    result.push(-1);
+                }
+                else if (text[i] == "1") {
+                    result.push(1);
+                }
+            }
+            if (result.length != this.J * this.I) {
+                alert("Ошибка в поле ввода – длина не соответствует размерности матрицы.");
+                return;
+            }
+            this.data = result;
+            this.update_table(this.color_table_type, this.color_table_id);
+            this.update_table(this.code_table_type, this.code_table_id);
         }
 
 
-        class image {
-            constructor (I, J, input_textfield_id, output_textfield_id, input_button_id, output_button_id, color_table_id, code_table_id ) {
-                this.I = I;
-                this.J = J;
-                this.data = [];
-                for (var d = 0; d < I*J; ++d) {
-                    this.data.push(-1);
-                }
-                this.input_textfield_id = input_textfield_id;
-                this.output_textfield_id = output_textfield_id;
-                this.input_button_id = input_button_id;
-                this.output_button_id = output_button_id;
-                this.color_table_id = color_table_id;
-                this.code_table_id = code_table_id;
-                this.color_table_type = "color_table";
-                this.code_table_type = "code_table";
-
-                var button_input = document.getElementById(this.input_button_id);
-                var t = this;
-                button_input.onclick = function() {
-                    t.load_code_in_table();
-                }
-
-                var button_output = document.getElementById(output_button_id);
-                var data_ = this.data;
-                button_output.onclick = function() { 
-                    var text_field = document.getElementById(output_textfield_id);
-                    text_field.value = data_;
-                }
-            }
-
-            input_button_init() {
-                var button_input = document.getElementById(this.input_button_id);
-                var input_textfield_id = this.input_textfield_id;
-                
-                var t = this;
-                button_input.onclick = function() {
-                    t.load_code_in_table();
-                }
-            }
-
-            table_init(table_name_in_str) {
-                // table name field must not contain a character 'c' !
-                // code table name is this table name plus \'
-                var table = document.getElementById(this.color_table_id);
-                var code_table = document.getElementById(this.code_table_id);
-                for (var j = 0; j < this.J; ++j) {
-                    var row = document.createElement("tr");
-                    var code_row = document.createElement("tr");
-                    for (var i = 0; i < this.I; ++i) {
-                        var cell = document.createElement("td");
-                        var code_cell = document.createElement("td");
-                        cell.id = "t" + table_name_in_str + "c" + j.toString() + i.toString();
-                        cell.width = 30;
-                        cell.height = 30;
-                        
-                        var I_ = this.I;
-                        var data = this.data;
-                        cell.addEventListener("click", function(){
-                            var row_num_in_str = this.id.substr(this.id.match(/c/).index + 1, 1);
-                            var row_num = parseInt(row_num_in_str, 10);
-                            var cell_num = this.cellIndex;
-                            var code_table_cell_id = "t" + table_name_in_str + "\'c" + row_num.toString() + cell_num.toString();
-                            var code_table_cell = document.getElementById(code_table_cell_id);
-                            if (this.bgColor == "black") {this.bgColor = "white"; data[((row_num) * I_ ) + cell_num] = -1; code_table_cell.innerHTML = "-1"; }
-                            else {this.bgColor = "black"; data[((row_num) * I_ ) + cell_num] = 1; code_table_cell.innerHTML = "1"; }
-                        });
-                        
-                        code_cell.id = "t" + table_name_in_str + "\'c" + j.toString() + i.toString();
-                        code_cell.width = 30;
-                        code_cell.height = 30;
-                        code_cell.innerHTML = this.data[i*j];
-                        
-                        row.appendChild(cell);
-                        code_row.appendChild(code_cell);
+        update_table(table_type, table_id) {
+            var table = document.getElementById(table_id);
+            var rows = table.getElementsByTagName("tr");
+            for (var i = 0; i < rows.length; ++i) {
+                var row = rows[i].children;
+                for (var j = 0; j < row.length; ++j) {
+                    if (table_type == "code_table") {
+                        // console.log(this.data[i*this.I+j]);
+                        row[j].innerHTML = this.data[i * this.I + j];
                     }
-                    table.appendChild(row);
-                    code_table.appendChild(code_row);
-                }
-                this.update_table(this.code_table_type, this.code_table_id);
-            }
-
-            load_code_in_table() {
-                var text = document.getElementById(this.input_textfield_id).value;
-                var result = [];
-                for (var i = 0; i < text.length; ++i) {
-                    if (text[i-1]+text[i] == "-1") {
-                        result.push(-1);
-                    }
-                    else if (text[i] == "1"){
-                        result.push(1);
-                    }
-                }
-                if (result.length != this.J*this.I){
-                    alert("Ошибка в поле ввода – длина не соответствует размерности матрицы.");
-                    return;
-                }
-                this.data = result;
-                this.update_table(this.color_table_type, this.color_table_id);
-                this.update_table(this.code_table_type, this.code_table_id);
-            }
-
-
-            update_table(table_type, table_id) {
-                var table = document.getElementById(table_id);
-                var rows = table.getElementsByTagName("tr");
-                for (var i = 0; i < rows.length; ++i) {
-                    var row = rows[i].children;
-                    for (var j = 0; j < row.length; ++j) {
-                        if (table_type == "code_table") {
-                            // console.log(this.data[i*this.I+j]);
-                            row[j].innerHTML = this.data[i*this.I+j];
+                    else if (table_type == "color_table") {
+                        if (this.data[i * this.I + j] == 1) {
+                            row[j].bgColor = "black";
                         }
-                        else if (table_type == "color_table") {
-                            if (this.data[i*this.I+j] == 1) {
-                                row[j].bgColor = "black";
-                            }
-                            else {
-                                row[j].bgColor = "white";
-                            }
+                        else {
+                            row[j].bgColor = "white";
                         }
                     }
                 }
             }
-
-            update_text_field(text_field_id, data) {
-                var text_field = document.getElementById(text_field_id);
-                text_field.value = data;
-            }
-
         }
 
-    </script>
+        update_text_field(text_field_id, data) {
+            var text_field = document.getElementById(text_field_id);
+            text_field.value = data;
+        }
+
+    }
+
+</script>
+
 </html>
