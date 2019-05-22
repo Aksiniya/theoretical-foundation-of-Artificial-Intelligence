@@ -13,6 +13,7 @@
             <b>Количество образов: </b><input type="number" id="image_number" min="1" value="3">
             <input type="button" id="apply_settings" value="Go!"><br>
     </div>
+    <h1>Образы</h1>
     <div class="image_holder" id="images_array_div">
         <div class="image">
             <textarea id="load_image_textfield_1" cols="26" rows="5"
@@ -24,6 +25,15 @@
             <input type="button" id="get_image_code_button_1" value="Получить код"><br>
         </div>
     </div>
+    <hr>
+    <h2>Входной вектор программы</h2>
+    <p><input type="button" id="get_images_vector_button" value="Выгрузить вектор"></p>
+    Вектор образов:<textarea id="result_images_vector_textfield" style="width: 100%"></textarea>
+    <hr>
+    <h1>Загрузка</h1>
+    <div class="image_holder" id="result_div">
+        
+    </div>
 
 </body>
 
@@ -32,8 +42,13 @@
         resize: vertical;
         max-height: 100px;
     }   
+    .image_holder {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around
+    }
+    
     .image {
-        float: left;
         margin: 10px;
     } 
 </style>
@@ -44,12 +59,12 @@
     var image_number = 3;
 
     var image_array = []
+    var output_tables_array = []
     var images_array_div = document.getElementById("images_array_div");
 
     window.onload = function () {
-        var first_image = new image(I, J, "1", "load_image_textfield_1", "get_image_code_textfield_1", "load_code_in_table_button_1", "get_image_code_button_1", "image_color_table_1", "image_code_table_1");
+        var first_image = new image(I, J, "1", "load_image_textfield_1", "get_image_code_textfield_1", "load_code_in_table_button_1", "get_image_code_button_1", "image_color_table_1", "image_code_table_1", true, true);
         image_array.push(first_image);
-        // create_image("2", "images_array_div", image_array);
         for (var im = 0; im < image_array.length; ++im ) {
             image_array[im].table_init();
         }
@@ -67,31 +82,57 @@
             image_array = [];
             image_array = [];
             for (var table_name = 0; table_name < image_number; ++table_name) {
-                create_image(table_name.toString(), "images_array_div",  image_array);
+                create_image(table_name.toString(), "images_array_div",  image_array, false, true);
             }
-
             console.log(image_array);
+        }
+
+        create_output_tables();
+
+        document.getElementById(output_tables_array[1].input_textfield_id).placeholder = "Результат работы программы";
+        document.getElementById(output_tables_array[0].input_textfield_id).placeholder = "Искаженный образ";
+
+        var get_images_vector_button = document.getElementById("get_images_vector_button");
+        get_images_vector_button.onclick = function() {
+            var output_images_vector_textfield = document.getElementById("result_images_vector_textfield");
+            result = [];
+            for (var img = 0; img < image_array.length; ++img) {
+
+                result.push( "[ " + image_array[img].data.join(" , ") + " ]" );
+            }
+            output_images_vector_textfield.value = "[ " + result.join(" , ") + " ]";
         }
     }
 
-    function create_image(table_name, div_holder_id, image_array_) {
+    function create_output_tables() {
+        create_image("input_image", "result_div", output_tables_array, true, true );
+        create_image("output_image", "result_div", output_tables_array, true, false );
+    }
+
+    function create_image(table_name, div_holder_id, image_array_, display_input, display_output) {
+        
+        // console.log(table_name, display_input, display_output);
+        // debugger;
+
         var div_image = document.createElement("div");
         div_image.className = "image";
 
-        var input_textfield = document.createElement("textarea");
-        input_textfield.id = "load_image_textfield_" + table_name;
-        input_textfield.cols = "26";
-        input_textfield.rows = "5";
-        input_textfield.placeholder = "Вектор типа [p1, p2, ..., p(I*J-1)] ,где p – пиксель (p = 1 – чёрный пиксель, p = -1 – белый пиксель)";
-        div_image.appendChild(input_textfield);
-        div_image.append(document.createElement("br"));
+        if (display_input == true) {
+            var input_textfield = document.createElement("textarea");
+            input_textfield.id = "load_image_textfield_" + table_name;
+            input_textfield.cols = "26";
+            input_textfield.rows = "5";
+            input_textfield.placeholder = "Вектор типа [p1, p2, ..., p(I*J-1)] ,где p – пиксель (p = 1 – чёрный пиксель, p = -1 – белый пиксель)";
+            div_image.appendChild(input_textfield);
+            div_image.append(document.createElement("br"));
 
-        var load_button = document.createElement("input");
-        load_button.type = "button";
-        load_button.id = "load_code_in_table_button_" + table_name;
-        load_button.value = "Загрузить код в таблицу";
-        div_image.appendChild(load_button);
-        div_image.appendChild(document.createElement("br"));
+            var load_button = document.createElement("input");
+            load_button.type = "button";
+            load_button.id = "load_code_in_table_button_" + table_name;
+            load_button.value = "Загрузить код в таблицу";
+            div_image.appendChild(load_button);
+            div_image.appendChild(document.createElement("br"));
+        }
 
         var color_table = document.createElement("table");
         color_table.id = "image_color_table_" + table_name;
@@ -106,30 +147,33 @@
         div_image.appendChild(code_table);
         div_image.appendChild(document.createElement("br"));
 
-        var output_textfield = document.createElement("textarea");
-        output_textfield.id = "get_image_code_textfield_" + table_name;
-        output_textfield.cols = "26";
-        output_textfield.rows = "5";
-        div_image.appendChild(output_textfield);
-        div_image.append(document.createElement("br"));
+        if (display_output == true) {
+            var output_textfield = document.createElement("textarea");
+            output_textfield.id = "get_image_code_textfield_" + table_name;
+            output_textfield.cols = "26";
+            output_textfield.rows = "5";
+            output_textfield.disabled = true;
+            div_image.appendChild(output_textfield);
+            div_image.append(document.createElement("br"));
 
-        var get_code_button = document.createElement("input");
-        get_code_button.type = "button";
-        get_code_button.id = "get_image_code_button_" + table_name;
-        get_code_button.value = "Получить код";
-        div_image.appendChild(get_code_button);
-        div_image.appendChild(document.createElement("br"));
+            var get_code_button = document.createElement("input");
+            get_code_button.type = "button";
+            get_code_button.id = "get_image_code_button_" + table_name;
+            get_code_button.value = "Получить код";
+            div_image.appendChild(get_code_button);
+            div_image.appendChild(document.createElement("br"));
+        }
 
         var holder = document.getElementById(div_holder_id);
         holder.appendChild(div_image);
 
-        var image_ = new image(I, J, table_name, "load_image_textfield_" + table_name, "get_image_code_textfield_" + table_name, "load_code_in_table_button_" + table_name, "get_image_code_button_" + table_name, "image_color_table_" + table_name, "image_code_table_" + table_name);
+        var image_ = new image(I, J, table_name, "load_image_textfield_" + table_name, "get_image_code_textfield_" + table_name, "load_code_in_table_button_" + table_name, "get_image_code_button_" + table_name, "image_color_table_" + table_name, "image_code_table_" + table_name, display_input, display_output);
         image_.table_init();
         image_array_.push(image_);
     }
 
     class image {
-        constructor(I, J, table_name, input_textfield_id, output_textfield_id, input_button_id, output_button_id, color_table_id, code_table_id) {
+        constructor(I, J, table_name, input_textfield_id, output_textfield_id, input_button_id, output_button_id, color_table_id, code_table_id, display_input, display_output) {
             this.I = I;
             this.J = J;
             this.table_name = table_name;
@@ -146,14 +190,21 @@
             this.color_table_type = "color_table";
             this.code_table_type = "code_table";
 
-            var button_input = document.getElementById(this.input_button_id);
+            this.display_input = display_input;
+            this.display_output = display_output;
 
-            button_input.onclick = () => this.load_code_in_table();
-
-            var button_output = document.getElementById(output_button_id);
-            button_output.onclick = () => {
-                document.getElementById(output_textfield_id).value = this.data;
+            if (display_input == true) {
+                var button_input = document.getElementById(this.input_button_id);
+                button_input.onclick = () => this.load_code_in_table();
             }
+
+            if (display_output == true) {
+                var button_output = document.getElementById(output_button_id);
+                button_output.onclick = () => {
+                    document.getElementById(output_textfield_id).value = this.data;
+                }
+            }
+
         }
 
         table_init() {
