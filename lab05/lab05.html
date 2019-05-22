@@ -80,11 +80,14 @@
 
             images_array_div.innerHTML = "";
             image_array = [];
-            image_array = [];
             for (var table_name = 0; table_name < image_number; ++table_name) {
                 create_image(table_name.toString(), "images_array_div",  image_array, false, true);
             }
-            console.log(image_array);
+
+            document.getElementById("result_div").innerHTML = "";
+            output_tables_array = [];
+            create_output_tables();
+            // console.log(image_array);
         }
 
         create_output_tables();
@@ -110,7 +113,6 @@
     }
 
     function create_image(table_name, div_holder_id, image_array_, display_input, display_output) {
-        
         // console.log(table_name, display_input, display_output);
         // debugger;
 
@@ -201,7 +203,7 @@
             if (display_output == true) {
                 var button_output = document.getElementById(output_button_id);
                 button_output.onclick = () => {
-                    document.getElementById(output_textfield_id).value = this.data;
+                    document.getElementById(output_textfield_id).value = JSON.stringify(this.data);
                 }
             }
 
@@ -230,7 +232,6 @@
                         var cell_num = cell.cellIndex;
                         var code_table_cell_id = "t" + this.table_name + "\'c" + row_num.toString() + cell_num.toString();
                         var code_table_cell = document.getElementById(code_table_cell_id);
-                        console.log(this.table_name);
                         if (cell.bgColor == "black") { cell.bgColor = "white"; this.data[((row_num) * this.I) + cell_num] = -1; code_table_cell.innerHTML = "-1"; }
                         else { cell.bgColor = "black"; this.data[((row_num) * this.I) + cell_num] = 1; code_table_cell.innerHTML = "1"; }
                     });
@@ -277,7 +278,6 @@
                 var row = rows[i].children;
                 for (var j = 0; j < row.length; ++j) {
                     if (table_type == "code_table") {
-                        // console.log(this.data[i*this.I+j]);
                         row[j].innerHTML = this.data[i * this.I + j];
                     }
                     else if (table_type == "color_table") {
