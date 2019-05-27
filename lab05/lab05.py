@@ -1,19 +1,11 @@
 import neuron
 import json
-# input_images = [ [ -1 , -1 , 1 , -1 , -1 , -1 , 1 , 1 , -1 , -1 , 1 , -1 , 1 , -1 , -1 , -1 , -1 , 1 , -1 , -1 , -1 , -1 , 1 , -1 , -1 , -1 , -1 , 1 , -1 , -1 , -1 , -1 , 1 , -1 , -1 , 1 , 1 , 1 , 1 , 1 ] , [ -1 , 1 , 1 , 1 , -1 , 1 , -1 , -1 , -1 , 1 , 1 , -1 , -1 , -1 , 1 , -1 , -1 , -1 , 1 , -1 , -1 , -1 , 1 , -1 , -1 , -1 , 1 , -1 , -1 , -1 , 1 , -1 , -1 , -1 , 1 , 1 , 1 , 1 , 1 , 1 ] , [ -1 , -1 , 1 , -1 , -1 , -1 , 1 , 1 , 1 , -1 , 1 , -1 , 1 , -1 , 1 , -1 , 1 , 1 , 1 , -1 , 1 , -1 , 1 , -1 , 1 , -1 , 1 , 1 , 1 , -1 , 1 , -1 , 1 , -1 , 1 , -1 , -1 , 1 , -1 , -1 ] ]
-# recognizable_image = [-1,1,1,1,-1,-1,-1,-1,-1,1,-1,-1,-1,-1,1,-1,-1,-1,1,-1,-1,-1,1,-1,-1,-1,1,-1,-1,-1,1,-1,-1,-1,-1,1,1,1,1,-1]
-
-
 
 def main():
 
     print("Введите вектор образов, а затем искаженный образ:")
-    # input_images_from_console = ()
     input_images = json.loads(input())
-    # print(input_images)
-    # print("Введите искаженный образ:")
     recognizable_image = json.loads(input())
-    # print(recognizable_image)
 
     weights = []
     neuron_layer = learning_process(weights, input_images)
@@ -42,8 +34,6 @@ def recognize_image(image, neuron_layer, era_num, input_images):
     print("Я не знаю что это.")
     print("Химера: ", output)
 
-    
-
 def learning_process(weights, input_images):
     weights_init(weights, input_images)
     neuron_layer = []
@@ -70,6 +60,5 @@ def first_y_init(layer, input):
         neuron_i.input_set_init(input)
         neuron_i.y_init_by_value(input[index])
         index += 1
-
 
 main()
