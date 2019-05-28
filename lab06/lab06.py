@@ -10,6 +10,7 @@ class Coordinate():
     def distance(self, other_coordinate):
         return math.sqrt((other_coordinate.coordinate_X - self.coordinate_X)**2 + (other_coordinate.coordinate_Y - self.coordinate_Y)**2)
 
+# просто точка с именем
 class Object_in_map:
     def __init__(self, name="", coordinate=Coordinate()):
         self.name = name
@@ -18,12 +19,13 @@ class Object_in_map:
     def print(self):
         print(self.name, self.coordinate.coordinate_X, self.coordinate.coordinate_Y)
 
+# точка с доп. параметром
 class point_object_in_map(Object_in_map):
     def __init__(self, name="", coordinate=Coordinate(), cluster_name=""):
         Object_in_map.__init__(self, name=name, coordinate=coordinate)
         self.cluster_name = cluster_name
 
-
+# функция по развертке json для посольств в Москве
 def embassy_deserialization(full_path_to_json):
     with open(full_path_to_json, "r",  encoding = "Windows-1251") as read_file:
         data = json.load(read_file)
@@ -33,9 +35,15 @@ def embassy_deserialization(full_path_to_json):
         clusters.append(Object_in_map(embassy["Name"], coordinates))
     return clusters
 
+# функция по развертке json парковок в Москве. Каждый раз возвращает разный вектор с limit парковками
 def parking_deserialization(full_path_to_json, limit):
     with open(full_path_to_json, "r",  encoding = "Windows-1251") as read_file:
         data = json.load(read_file)
+
+    if (len(data) < limit):
+        print("Ошибка: указанный размер выборки превышает размер данных.\nБудут возвращены все данные, а не выборка.")
+        limit = len(data)
+
     parkings = []
     current_index = 0
 
@@ -53,6 +61,7 @@ def parking_deserialization(full_path_to_json, limit):
         current_index += 1
     return parkings
 
+# функция по развертке json учебных учреждений в Москве. Каждый раз возвращает разный вектор школ с количеством школ = limit
 def college_deserialization(full_path_to_json, limit):
     with open(full_path_to_json, "r",  encoding = "Windows-1251") as read_file:
         data = json.load(read_file)
@@ -68,10 +77,14 @@ def college_deserialization(full_path_to_json, limit):
             new_data.append(d)
     data = new_data
 
+    if (len(data) < limit):
+        print("Ошибка: Указанный размер выборки превышает размер данных.\nБудут возвращены все данные, а не выборка.")
+        limit = len(data)
+
     # Получить рандомные индексы таким образом, чтобы они не повторялись.
     rand_indexes = {}
-    while (len(rand_indexes) < limit-1):
-        rand_indexes[random.randint(0, len(data)-1)] = "_"
+    while (len(rand_indexes) < limit):
+        rand_indexes[random.randint(0, len(data)-1)] = " "
         
     for college_index in rand_indexes.keys():
         if (current_index >= limit):
@@ -79,16 +92,14 @@ def college_deserialization(full_path_to_json, limit):
         c = data[college_index]["geoData"]["center"][0]
         coordinates = Coordinate(c[0], c[1])
         colleges.append(point_object_in_map(data[college_index]["InstitutionsAddresses"][0]["FullName"], coordinates, data[college_index]["InstitutionsAddresses"][0]["AdmArea"]))
-        # print (data[parking_index])
         current_index += 1
     return colleges
 
 class Kohonen_neuron:
-    def __init__(self, weights=[], input_set = [], net = 0, cluster=Object_in_map()):
+    def __init__(self, weights=[], input_set = [], net = 0):
         self.weights = weights 
         self.input_set = input_set
         self.net = net
-        self.cluster = cluster        
 
     def output(self):
         return math.sqrt((self.weights[0] - self.input_set[0])**2 + (self.weights[1] - self.input_set[1])**2)
@@ -98,9 +109,10 @@ class Kohonen_neuron:
         for w in self.weights: print("%.{0}f".format(signs) % w, end = " ")
         print("]", end = "")
 
+# Функция получает на вход выход нс и преобразует его в бинарный
 def competition_function(vector):
     output_binary_vector = []
-    min_value = min(vector)
+    min_value = min(vector) # минимальное расстояние
     for _ in vector:
         if (_ == min_value):
             output_binary_vector.append(1)
@@ -108,12 +120,13 @@ def competition_function(vector):
             output_binary_vector.append(0)
     return output_binary_vector
 
+# подача на вход нс (layer) вектора input_set
 def get_output_y_vector(input_set, layer):
     y_vector = []
     for neuron_i in range(len(layer)):
         layer[neuron_i].input_set = input_set
         y_vector.append(layer[neuron_i].output())
-    return competition_function(y_vector)
+    return competition_function(y_vector) # бинарный выход
 
 def distrits_deserialization():
     json_districts = {'Центральный административный округ': [55.750000, 37.616670],
@@ -130,18 +143,20 @@ def distrits_deserialization():
                         #   'Новомосковский административный округ': [55.558121, 37.370724]
                           }
 
-    districts = []
+    admArea = []
     for key in json_districts.keys():
         coord = Coordinate(json_districts[key][1], json_districts[key][0])
-        districts.append(Object_in_map(key, coord))
-    return districts
+        admArea.append(Object_in_map(key, coord))
+    return admArea
 
 
 def main():
-    # clusters = embassy_deserialization("/Users/macbook/Desktop/Учебная/ИТИБ/Лабораторная 6/посольства-в-Москве.json")
-    # parkings = parking_deserialization("/Users/macbook/Desktop/Учебная/ИТИБ/Лабораторная 6/парковки.json", 200)
     clusters = distrits_deserialization()
-    parkings = college_deserialization("/Users/macbook/Desktop/Учебная/ИТИБ/Лабораторная 6/data-54518-2019-05-27.json", 200)
+    print("Введите полный путь до json со школами:")
+    path_to_colleges = input()
+    print("Введите количество школ для кластеризации:")
+    num_of_schools = input()
+    colleges = college_deserialization(path_to_colleges, int(num_of_schools))
 
     kohonen_layer = []
     for cluster in clusters:
@@ -152,23 +167,23 @@ def main():
     for _ in clusters:
         result_cluster_distribution.append([_.name])
 
-    for parking in parkings:
-        input_set = [parking.coordinate.coordinate_X, parking.coordinate.coordinate_Y]
+    for college in colleges:
+        input_set = [college.coordinate.coordinate_X, college.coordinate.coordinate_Y]
         binary_output = get_output_y_vector(input_set, kohonen_layer)
         # print (binary_output)
         for index in range(len(binary_output)):
             if binary_output[index] == 1:
-                result_cluster_distribution[index].append(parking)
+                result_cluster_distribution[index].append(college)
 
     wrong_counter = 0
     for clust in result_cluster_distribution:
         clust_name = clust[0]
         print(clust_name)
-        for park_index in range(1, len(clust)):
-            print(clust[park_index].name, "\t|",clust[park_index].cluster_name)
-            if clust[park_index].cluster_name != clust_name:
+        for college_index in range(1, len(clust)):
+            print(clust[college_index].name, "\t|",clust[college_index].cluster_name)
+            if clust[college_index].cluster_name != clust_name:
                 wrong_counter += 1
         print("--------------")
-    print("Процент ошибки:", round(( wrong_counter / len(parkings) ) * 100, 1 ) , "%" )
+    print("Процент ошибки:", round(( wrong_counter / len(colleges) ) * 100, 1 ) , "%" )
     
 main()
