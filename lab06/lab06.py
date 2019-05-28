@@ -59,16 +59,26 @@ def college_deserialization(full_path_to_json, limit):
     colleges = []
     current_index = 0
 
+    # Обработка несистематизированных данных
+    new_data = []
+    for d in data:
+        geoData = d["geoData"]
+        cent_exist = "center" in geoData
+        if (cent_exist):
+            new_data.append(d)
+    data = new_data
+
     # Получить рандомные индексы таким образом, чтобы они не повторялись.
     rand_indexes = {}
-    while (len(rand_indexes) < limit):
+    while (len(rand_indexes) < limit-1):
         rand_indexes[random.randint(0, len(data)-1)] = "_"
         
     for college_index in rand_indexes.keys():
         if (current_index >= limit):
             break
-        coordinates = Coordinate(data[college_index]["geoData"]["center"][0][0],data[colleeg_index]["geoData"]["center"][0][1])
-        colleges.append(point_object_in_map(data[college_index]["ParkingName"], coordinates, data[college_index]["AdmArea"]))
+        c = data[college_index]["geoData"]["center"][0]
+        coordinates = Coordinate(c[0], c[1])
+        colleges.append(point_object_in_map(data[college_index]["InstitutionsAddresses"][0]["FullName"], coordinates, data[college_index]["InstitutionsAddresses"][0]["AdmArea"]))
         # print (data[parking_index])
         current_index += 1
     return colleges
@@ -129,8 +139,9 @@ def distrits_deserialization():
 
 def main():
     # clusters = embassy_deserialization("/Users/macbook/Desktop/Учебная/ИТИБ/Лабораторная 6/посольства-в-Москве.json")
-    parkings = parking_deserialization("/Users/macbook/Desktop/Учебная/ИТИБ/Лабораторная 6/парковки.json", 200)
+    # parkings = parking_deserialization("/Users/macbook/Desktop/Учебная/ИТИБ/Лабораторная 6/парковки.json", 200)
     clusters = distrits_deserialization()
+    parkings = college_deserialization("/Users/macbook/Desktop/Учебная/ИТИБ/Лабораторная 6/data-54518-2019-05-27.json", 200)
 
     kohonen_layer = []
     for cluster in clusters:
@@ -158,6 +169,6 @@ def main():
             if clust[park_index].cluster_name != clust_name:
                 wrong_counter += 1
         print("--------------")
-    print("Процент ошибки:", ( wrong_counter / len(parkings) ) * 100 , "%" )
+    print("Процент ошибки:", round(( wrong_counter / len(parkings) ) * 100, 1 ) , "%" )
     
 main()
