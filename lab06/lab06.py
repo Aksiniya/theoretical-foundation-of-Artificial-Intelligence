@@ -18,7 +18,7 @@ class Object_in_map:
     def print(self):
         print(self.name, self.coordinate.coordinate_X, self.coordinate.coordinate_Y)
 
-class Parking_in_map(Object_in_map):
+class point_object_in_map(Object_in_map):
     def __init__(self, name="", coordinate=Coordinate(), cluster_name=""):
         Object_in_map.__init__(self, name=name, coordinate=coordinate)
         self.cluster_name = cluster_name
@@ -48,10 +48,30 @@ def parking_deserialization(full_path_to_json, limit):
         if (current_index >= limit):
             break
         coordinates = Coordinate(data[parking_index]["geoData"]["center"][0][0],data[parking_index]["geoData"]["center"][0][1])
-        parkings.append(Object_in_map(data[parking_index]["ParkingName"] + " ( " + data[parking_index]["AdmArea"] + " )", coordinates))
+        parkings.append(point_object_in_map(data[parking_index]["ParkingName"], coordinates, data[parking_index]["AdmArea"]))
         # print (data[parking_index])
         current_index += 1
     return parkings
+
+def college_deserialization(full_path_to_json, limit):
+    with open(full_path_to_json, "r",  encoding = "Windows-1251") as read_file:
+        data = json.load(read_file)
+    colleges = []
+    current_index = 0
+
+    # Получить рандомные индексы таким образом, чтобы они не повторялись.
+    rand_indexes = {}
+    while (len(rand_indexes) < limit):
+        rand_indexes[random.randint(0, len(data)-1)] = "_"
+        
+    for college_index in rand_indexes.keys():
+        if (current_index >= limit):
+            break
+        coordinates = Coordinate(data[college_index]["geoData"]["center"][0][0],data[colleeg_index]["geoData"]["center"][0][1])
+        colleges.append(point_object_in_map(data[college_index]["ParkingName"], coordinates, data[college_index]["AdmArea"]))
+        # print (data[parking_index])
+        current_index += 1
+    return colleges
 
 class Kohonen_neuron:
     def __init__(self, weights=[], input_set = [], net = 0, cluster=Object_in_map()):
@@ -129,11 +149,15 @@ def main():
             if binary_output[index] == 1:
                 result_cluster_distribution[index].append(parking)
 
-
+    wrong_counter = 0
     for clust in result_cluster_distribution:
-        print(clust[0])
+        clust_name = clust[0]
+        print(clust_name)
         for park_index in range(1, len(clust)):
-            print(clust[park_index].name)
+            print(clust[park_index].name, "\t|",clust[park_index].cluster_name)
+            if clust[park_index].cluster_name != clust_name:
+                wrong_counter += 1
         print("--------------")
-                
+    print("Процент ошибки:", ( wrong_counter / len(parkings) ) * 100 , "%" )
+    
 main()
