@@ -61,38 +61,3 @@ class Hopfield_neuron(one_neuron):
             sum_net += self.weights[w_ind] * previous_y_vector[w_ind]
         self.net = sum_net
         return sum_net
-
-def make_plot(plot_dict, ax, name, xlabel_name, y_label_name):
-    for k in plot_dict:
-        ax.scatter(k, plot_dict[k], c='b')
-        if (k != 1):
-            ax.plot([ k-1,  k], [plot_dict[k-1], plot_dict[k]], 'c')
-    ax.grid(True)
-    ax.set(xlabel=xlabel_name, ylabel=y_label_name, title=name)
-
-def make_plot_line(plot_dict, ax, name = "", xlabel_name = "", y_label_name = "" ):
-    x = sorted(plot_dict.keys())
-    y = [ plot_dict[i] for i in x] #plot_dict.values()
-
-    ax.plot(x, y)
-    ax.set(xlabel=xlabel_name, ylabel=y_label_name, title=name)
-    ax.grid()
-
-def make_plot_point(plot_dict, ax, name = "", xlabel_name = "", y_label_name = "" ):
-    x = sorted(plot_dict.keys())
-    y = [ plot_dict[i] for i in x] #plot_dict.values()
-
-    for key in plot_dict.keys():
-        ax.plot(key, plot_dict[key], 'bo')
-
-    ax.plot(x, y)
-    ax.set(xlabel=xlabel_name, ylabel=y_label_name, title=name)
-    ax.grid()
-
-def print_note(note):
-    count_of_eq = int((40-len(note))/2)
-    print("="*count_of_eq, end="")
-    print(" " + note + " ", end = "")
-    print("="*count_of_eq, end="")
-    if (len(note)%2 == 1): print("=", end = "")
-    print()
