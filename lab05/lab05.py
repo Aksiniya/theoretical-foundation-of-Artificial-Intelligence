@@ -9,6 +9,9 @@ def main():
 
     weights = []
     neuron_layer = learning_process(weights, input_images)
+    print("Полученная матрица весов:")
+    for w in weights:
+        print(w)
     recognize_image( recognizable_image, neuron_layer, 10, input_images)
 
 
