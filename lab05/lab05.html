@@ -8,41 +8,87 @@
 
 <body>
     <div class="settings">
-            <b>Ширина: </b><input type="number" id="pixel_width" min="2" max="20" value="5">
-            <b>Высота: </b><input type="number" id="pixel_height" min="2" max="20" value="8">
-            <b>Количество образов: </b><input type="number" id="image_number" min="1" value="3">
-            <input type="button" id="apply_settings" value="Go!"><br>
+        <p>Ширина: <input type="number" id="pixel_width" min="2" max="20" value="5">
+            Высота: <input type="number" id="pixel_height" min="2" max="20" value="8">
+        </p>
+        <p>
+            Количество образов: <input type="number" id="image_number" min="1" value="3">
+        </p>
+        <input type="button" id="apply_settings" value="Нарисовать таблицы" onclick="apply_settings()"><br>
     </div>
-    <h1>Образы</h1>
-    <div class="image_holder" id="images_array_div">
-        <div class="image">
-            <textarea id="load_image_textfield_1" cols="26" rows="5"
-                placeholder="Вектор типа [p1, p2, ..., p(I*J-1)] ,где p – пиксель (p = 1 – чёрный пиксель, p = -1 – белый пиксель)"></textarea><br>
-            <input type="button" id="load_code_in_table_button_1" value="Загрузить код в таблицу"><br>
-            <table id="image_color_table_1" border="1"></table><br>
-            <table id="image_code_table_1" border="1"></table><br>
-            <textarea id="get_image_code_textfield_1" cols="26" rows="5" disabled></textarea><br>
-            <input type="button" id="get_image_code_button_1" value="Получить код"><br>
+
+    <div class="forms">
+        <h1>Образы</h1>
+        <p>
+            Образы не должны быть очень похожи друг на друга, иначе в некоторых случаях возможно зацикливание при распознавании.
+        </p>
+        <div class="image_holder" id="images_array_div">
+                <div class="image">
+                    <textarea id="load_image_textfield_1" cols="26" rows="5"
+                        placeholder="Вектор типа [p1, p2, ..., p(I*J-1)] ,где p – пиксель (p = 1 – чёрный пиксель, p = -1 – белый пиксель)"></textarea><br>
+                    <input type="button" id="load_code_in_table_button_1" value="Загрузить код в таблицу"><br>
+                    <table id="image_color_table_1" border="1"></table><br>
+                    <table id="image_code_table_1" border="1"></table><br>
+                    <textarea id="get_image_code_textfield_1" cols="26" rows="5" disabled></textarea><br>
+                    <input type="button" id="get_image_code_button_1" value="Получить код"><br>
+                </div>
         </div>
     </div>
+
     <hr>
+
     <h2>Входной вектор программы</h2>
-    <p><input type="button" id="get_images_vector_button" value="Выгрузить вектор"></p>
+    <p>
+        <input type="button" id="get_images_vector_button" value="Выгрузить вектор" onclick="get_images_text_vector()">
+    </p>
+    
     Вектор образов:<textarea id="result_images_vector_textfield" style="width: 100%"></textarea>
     <hr>
-    <h1>Загрузка</h1>
-    <div class="image_holder" id="result_div">
-        
+    
+
+    <div class="forms">
+        <h1>Загрузка</h1>
+        <div class="image_holder" id="result_div"></div>        
     </div>
+
+    <input type="button" value="Test button"  onclick="main()">
+
+
 
 </body>
 
 <style>
+    .settings {
+        text-align: center;
+    }
+
+    .settings p {
+        font-weight: bold;
+    }
+    .settings input {
+        text-align: center;
+        font-style: italic;
+        border-radius: 0.5em;
+        border-width: 1px;
+        border-style:solid;
+        border-color:palegreen;
+        height: 2.5em;
+        padding-left: 2em;
+        padding-right: 2em;
+    }
+
+    .forms {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
     textarea {
         resize: vertical;
         max-height: 100px;
     }   
+
     .image_holder {
+        text-align: center;
         display: flex;
         flex-wrap: wrap;
         justify-content: space-around
@@ -50,85 +96,115 @@
     
     .image {
         margin: 10px;
-    } 
+    }
+
+    .image table td {
+        width: 30px;
+        height: 30px;
+    }
+
+    .image table {
+        margin: auto;
+        margin-top: 1em;
+        border-collapse: collapse;
+    }
+
+    .image input {
+        border-radius: 0.5em;
+        border-width: 1px;
+        border-style:solid;
+        border-color:palegreen;
+        height: 2.5em;
+        padding-left: 2em;
+        padding-right: 2em;
+    }
+
+    .image textarea {
+        width: 18em;
+        height: 5em;
+
+        border-radius: 0.5em;
+        border-width: 1px;
+        border-style:solid;
+        border-color:palegreen;
+    }
 </style>
 
 <script>
-    var J = 8;
-    var I = 5;
-    var image_number = 3;
+    let pixel_width = document.getElementById('pixel_width');
+    let pixel_height = document.getElementById('pixel_height');
+    let image_num_field = document.getElementById('image_number');
 
-    var image_array = []
-    var output_tables_array = []
-    var images_array_div = document.getElementById("images_array_div");
+    let J = 0; // height
+    let I = 0; // width
+    let image_number = 0; // image number
+
+    let image_array = []
+    // let images_in_text = ''
+    // let images_code_array = []
+    let output_tables_array = []
+    let images_array_div = document.getElementById('images_array_div');
 
     window.onload = function () {
-        var first_image = new image(I, J, "1", "load_image_textfield_1", "get_image_code_textfield_1", "load_code_in_table_button_1", "get_image_code_button_1", "image_color_table_1", "image_code_table_1", true, true);
-        image_array.push(first_image);
-        for (var im = 0; im < image_array.length; ++im ) {
-            image_array[im].table_init();
-        }
+        I = pixel_width.value;
+        J = pixel_height.value;
+        image_number = image_num_field.value;
 
-        var apply_settings_button = document.getElementById("apply_settings");
-        apply_settings_button.onclick = function() {
-            var I_field = document.getElementById("pixel_width");
-            var J_field = document.getElementById("pixel_height");
-            var image_num_field = document.getElementById("image_number");
-            I = I_field.value;
-            J = J_field.value;
-            image_number = image_num_field.value;
+        apply_settings()
 
-            images_array_div.innerHTML = "";
-            image_array = [];
-            for (var table_name = 0; table_name < image_number; ++table_name) {
-                create_image(table_name.toString(), "images_array_div",  image_array, false, true);
-            }
-
-            document.getElementById("result_div").innerHTML = "";
-            output_tables_array = [];
-            create_output_tables();
-            // console.log(image_array);
-        }
-
-        create_output_tables();
-
-        document.getElementById(output_tables_array[1].input_textfield_id).placeholder = "Результат работы программы";
-        document.getElementById(output_tables_array[0].input_textfield_id).placeholder = "Искаженный образ";
-
-        var get_images_vector_button = document.getElementById("get_images_vector_button");
-        get_images_vector_button.onclick = function() {
-            var output_images_vector_textfield = document.getElementById("result_images_vector_textfield");
-            result = [];
-            for (var img = 0; img < image_array.length; ++img) {
-
-                result.push( "[ " + image_array[img].data.join(" , ") + " ]" );
-            }
-            output_images_vector_textfield.value = "[ " + result.join(" , ") + " ]";
-        }
+        document.getElementById(output_tables_array[0].input_textfield_id).placeholder = 'Искаженный образ';
+        document.getElementById(output_tables_array[1].input_textfield_id).placeholder = 'Результат работы программы';
+        load_test_data_in_table()
     }
 
-    function create_output_tables() {
+    function apply_settings() {
+        var image_num_field = document.getElementById("image_number");
+        I = pixel_width.value;;
+        J = pixel_height.value;
+        image_number = image_num_field.value;
+
+        images_array_div.innerHTML = "";
+        // image_array = [];
+        for (var table_name = 0; table_name < image_number; ++table_name) {
+            create_image(table_name.toString(), "images_array_div",  image_array, false, true);
+        }
+
+        document.getElementById("result_div").innerHTML = "";
+        // output_tables_array = [];
         create_image("input_image", "result_div", output_tables_array, true, true );
         create_image("output_image", "result_div", output_tables_array, true, false );
+        // create_output_tables();            
+    }
+
+    function get_images_text_vector() {
+        var output_images_vector_textfield = document.getElementById("result_images_vector_textfield");
+        let str = '';
+        let array = []
+        for (var img = 0; img < image_array.length; ++img) {
+            array.push(image_array[img].data);
+            // console.log(image_array[img].data);
+             
+        }
+        // result += "[ " + result.join(" , ") + " ]";
+        output_images_vector_textfield.value = '[' + array.join(', ') + ']';
+
+        console.log(array);
     }
 
     function create_image(table_name, div_holder_id, image_array_, display_input, display_output) {
-        // console.log(table_name, display_input, display_output);
         // debugger;
 
-        var div_image = document.createElement("div");
+        let div_image = document.createElement("div");
         div_image.className = "image";
 
         if (display_input == true) {
-            var input_textfield = document.createElement("textarea");
+            let input_textfield = document.createElement("textarea");
             input_textfield.id = "load_image_textfield_" + table_name;
-            input_textfield.cols = "26";
-            input_textfield.rows = "5";
-            input_textfield.placeholder = "Вектор типа [p1, p2, ..., p(I*J-1)] ,где p – пиксель (p = 1 – чёрный пиксель, p = -1 – белый пиксель)";
+            input_textfield.placeholder = "Вектор типа [p1, p2, ..., p(I*J-1)], где p – пиксель (p = 1 – чёрный пиксель, p = -1 – белый пиксель)";
             div_image.appendChild(input_textfield);
             div_image.append(document.createElement("br"));
 
-            var load_button = document.createElement("input");
+            let load_button = document.createElement("input");
             load_button.type = "button";
             load_button.id = "load_code_in_table_button_" + table_name;
             load_button.value = "Загрузить код в таблицу";
@@ -138,22 +214,20 @@
 
         var color_table = document.createElement("table");
         color_table.id = "image_color_table_" + table_name;
-        color_table.border = "1";
+        color_table.border = "2";
         div_image.appendChild(color_table);
         div_image.appendChild(document.createElement("br"));
 
 
         var code_table = document.createElement("table");
         code_table.id = "image_code_table_" + table_name;
-        code_table.border = "1";
+        code_table.border = "2";
         div_image.appendChild(code_table);
         div_image.appendChild(document.createElement("br"));
 
         if (display_output == true) {
             var output_textfield = document.createElement("textarea");
             output_textfield.id = "get_image_code_textfield_" + table_name;
-            output_textfield.cols = "26";
-            output_textfield.rows = "5";
             output_textfield.disabled = true;
             div_image.appendChild(output_textfield);
             div_image.append(document.createElement("br"));
@@ -221,8 +295,6 @@
                     var cell = document.createElement("td");
                     var code_cell = document.createElement("td");
                     cell.id = "t" + this.table_name + "c" + j.toString() + i.toString();
-                    cell.width = 30;
-                    cell.height = 30;
 
                     cell.addEventListener("click", (event) => {
                         // debugger;
@@ -237,8 +309,6 @@
                     });
 
                     code_cell.id = "t" + this.table_name + "\'c" + j.toString() + i.toString();
-                    code_cell.width = 30;
-                    code_cell.height = 30;
                     code_cell.innerHTML = this.data[i * j];
 
                     row.appendChild(cell);
@@ -250,8 +320,8 @@
             this.update_table(this.code_table_type, this.code_table_id);
         }
 
-        load_code_in_table() {
-            var text = document.getElementById(this.input_textfield_id).value;
+        load_code_in_table(text = document.getElementById(this.input_textfield_id).value) {
+            // var text = document.getElementById(this.input_textfield_id).value;
             var result = [];
             for (var i = 0; i < text.length; ++i) {
                 if (text[i - 1] + text[i] == "-1") {
@@ -269,7 +339,6 @@
             this.update_table(this.color_table_type, this.color_table_id);
             this.update_table(this.code_table_type, this.code_table_id);
         }
-
 
         update_table(table_type, table_id) {
             var table = document.getElementById(table_id);
@@ -296,8 +365,153 @@
             var text_field = document.getElementById(text_field_id);
             text_field.value = data;
         }
-
     }
+
+    // class one_neuron{
+    //     constructor(weights=[], input_set = [], net = 0, y = 0){
+    //         this.weights = weights
+    //         this.input_set = input_set
+    //         this.net = 0
+    //         this.y = 0
+    //     }
+    // }
+
+
+class Hopfield_neuron {
+    constructor(weights=[], input_set = [], net = 0, y = 0, previous_y = 0){
+        this.weights = weights;
+        this.input_set = input_set;
+        this.net = net;
+        this.y = y;
+        this.previous_y = previous_y;
+    }
+
+    previous_y_init(){
+        self.previous_y = self.y;
+    }
+
+    y_init(){
+        if (self.net > 0) {
+            self.y = 1;
+        }
+        else if (self.net < 0) {
+            self.y = -1;
+        } else {
+            self.y = self.previous_y;
+        }
+        return self.y;
+    }
+
+    y_init_by_value(value){
+        self.y = value;
+    }
+
+    net_init(previous_y_vector){
+        let sum_net = 0;
+        for (let w_ind = 0; w_ind < self.weights; ++w_ind) {
+            sum_net += self.weights[w_ind] * previous_y_vector[w_ind];
+        }
+        self.net = sum_net;
+        return sum_net;
+    }
+
+    input_set_init(input_){
+        self.input_set = input_
+    }
+}
+
+
+function main() {
+    // console.log("Введите вектор образов, а затем искаженный образ:");
+    let input_images = []
+    for (index in image_array) {        
+        input_images.push(image_array[index].data);
+    }
+
+    let recognizable_image = output_tables_array[0].data;
+
+    let weights = [];
+    let neuron_layer = learning_process(weights, input_images);
+    recognize_image( recognizable_image, neuron_layer, 10, input_images);
+}
+
+
+
+function recognize_image(image, neuron_layer, era_num, input_images){
+    first_y_init(neuron_layer, image);
+    let previous_y = Object.assign({}, image);
+    for (let ep_num = 0; ep_num < era_num; ++ep_num) {
+        var output = [];
+        for (neuron_i in neuron_layer) {
+            neuron_layer[neuron_i].previous_y_init();
+            neuron_layer[neuron_i].net_init(previous_y);
+            output.push(neuron_layer[neuron_i].y_init());
+        }
+        
+        previous_y = output;
+
+        for (l in input_images){
+            if (output == l) {
+                console.log("Распознано. Эпохи: " + ep_num);
+                // for str in range(5, len(l), 5):
+                //     print(l[str-5:str])
+                console.log("Output:");
+                console.log(output);
+                return;
+            }
+        }
+    }
+    console.log("Я не знаю что это.");
+    console.log("Химера: ");
+    console.log(output);
+}
+
+
+function learning_process(weights, input_images){
+    weights_init(weights, input_images);
+    let neuron_layer = []
+    //  инициализация весов    
+    for (let i = 0; i < input_images[0].length; ++i) {
+        w = weights[i];
+        neuron_layer.push( new Hopfield_neuron(w) );
+    }
+    return neuron_layer;
+}
+
+function weights_init(weights, input_images){
+    for (let k_m = 0; k_m < input_images[0].length; ++k_m) {
+        let weights_k = [] // вектор-вес K-го нейрона
+        for (k_n = 0; k_n < input_images[0].length; ++k_n ) {  // инициализация вектора
+            let w_mn = 0;
+            if (k_m != k_n) {
+                for (l in input_images){
+                    w_mn += input_images[l][k_n] * input_images[l][k_m];
+                }
+            }
+            weights_k.push(w_mn);
+        }
+        weights.push(weights_k);
+    }
+}
+
+
+function first_y_init(layer, input) {
+    let index = 0;
+    console.log(layer);
+    
+    for (neuron_i in layer) {
+        layer[neuron_i].input_set_init(input);
+        layer[neuron_i].y_init_by_value(input[index]);
+        index += 1;
+    }      
+}
+
+function load_test_data_in_table() {
+    image_array[0].load_code_in_table("[-1, -1, 1, -1, -1, -1, 1, 1, -1, -1, 1, -1, 1, -1, -1, -1, -1, 1, -1, -1, -1, -1, 1, -1, -1, -1, -1, 1, -1, -1, -1, -1, 1, -1, -1, 1, 1, 1, 1, 1]")
+    image_array[1].load_code_in_table("[1, 1, 1, 1, 1, 1, -1, -1, -1, 1, -1, -1, -1, -1, 1, -1, -1, -1, 1, -1, -1, -1, -1, 1, -1, -1, -1, 1, -1, -1, -1, 1, -1, -1, -1, 1, -1, -1, -1, -1]")
+    image_array[2].load_code_in_table("[1, -1, -1, -1, 1, 1, -1, -1, -1, 1, 1, -1, -1, -1, 1, 1, -1, -1, -1, 1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, -1, -1, -1, -1, 1, -1, -1, -1, -1, 1]")
+}
+
 
 </script>
 
